@@ -2,71 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, Trophy, RotateCcw, ChevronRight, X, ArrowLeft, Lock, Unlock } from 'lucide-react';
 
-const malePeople = [
-  { id: 'm1', name: 'Ahmed', img: 'https://randomuser.me/api/portraits/men/1.jpg' },
-  { id: 'm2', name: 'Ali', img: 'https://randomuser.me/api/portraits/men/2.jpg' },
-  { id: 'm3', name: 'Omar', img: 'https://randomuser.me/api/portraits/men/3.jpg' },
-  { id: 'm4', name: 'Tariq', img: 'https://randomuser.me/api/portraits/men/4.jpg' },
-  { id: 'm5', name: 'Youssef', img: 'https://randomuser.me/api/portraits/men/5.jpg' },
-  { id: 'm6', name: 'Mohammed', img: 'https://randomuser.me/api/portraits/men/6.jpg' },
-  { id: 'm7', name: 'Hassan', img: 'https://randomuser.me/api/portraits/men/7.jpg' },
-  { id: 'm8', name: 'Hussein', img: 'https://randomuser.me/api/portraits/men/8.jpg' },
-  { id: 'm9', name: 'Khalid', img: 'https://randomuser.me/api/portraits/men/9.jpg' },
-  { id: 'm10', name: 'Amir', img: 'https://randomuser.me/api/portraits/men/10.jpg' },
-  { id: 'm11', name: 'Zaid', img: 'https://randomuser.me/api/portraits/men/11.jpg' },
-  { id: 'm12', name: 'Ibrahim', img: 'https://randomuser.me/api/portraits/men/12.jpg' },
-  { id: 'm13', name: 'Bilal', img: 'https://randomuser.me/api/portraits/men/13.jpg' },
-  { id: 'm14', name: 'Faisal', img: 'https://randomuser.me/api/portraits/men/14.jpg' },
-  { id: 'm15', name: 'Kareem', img: 'https://randomuser.me/api/portraits/men/15.jpg' },
-  { id: 'm16', name: 'Mahmoud', img: 'https://randomuser.me/api/portraits/men/16.jpg' },
-  { id: 'm17', name: 'Nabil', img: 'https://randomuser.me/api/portraits/men/17.jpg' },
-  { id: 'm18', name: 'Osama', img: 'https://randomuser.me/api/portraits/men/18.jpg' },
-  { id: 'm19', name: 'Qasim', img: 'https://randomuser.me/api/portraits/men/19.jpg' },
-  { id: 'm20', name: 'Rami', img: 'https://randomuser.me/api/portraits/men/20.jpg' },
-  { id: 'm21', name: 'Sami', img: 'https://randomuser.me/api/portraits/men/21.jpg' },
-  { id: 'm22', name: 'Tarek', img: 'https://randomuser.me/api/portraits/men/22.jpg' },
-  { id: 'm23', name: 'Waleed', img: 'https://randomuser.me/api/portraits/men/23.jpg' },
-  { id: 'm24', name: 'Yasin', img: 'https://randomuser.me/api/portraits/men/24.jpg' },
-  { id: 'm25', name: 'Zakaria', img: 'https://randomuser.me/api/portraits/men/25.jpg' },
-  { id: 'm26', name: 'Abbas', img: 'https://randomuser.me/api/portraits/men/26.jpg' },
-  { id: 'm27', name: 'Baha', img: 'https://randomuser.me/api/portraits/men/27.jpg' },
-  { id: 'm28', name: 'Faruq', img: 'https://randomuser.me/api/portraits/men/28.jpg' },
-  { id: 'm29', name: 'Ghassan', img: 'https://randomuser.me/api/portraits/men/29.jpg' },
-  { id: 'm30', name: 'Hamza', img: 'https://randomuser.me/api/portraits/men/30.jpg' }
-];
+const malePeople: { id: string, name: string, img: string }[] = [];
 
-const femalePeople = [
-  { id: 'f1', name: 'Fatima', img: 'https://randomuser.me/api/portraits/women/1.jpg' },
-  { id: 'f2', name: 'Aisha', img: 'https://randomuser.me/api/portraits/women/2.jpg' },
-  { id: 'f3', name: 'Khadija', img: 'https://randomuser.me/api/portraits/women/3.jpg' },
-  { id: 'f4', name: 'Maryam', img: 'https://randomuser.me/api/portraits/women/4.jpg' },
-  { id: 'f5', name: 'Zainab', img: 'https://randomuser.me/api/portraits/women/5.jpg' },
-  { id: 'f6', name: 'Sarah', img: 'https://randomuser.me/api/portraits/women/6.jpg' },
-  { id: 'f7', name: 'Huda', img: 'https://randomuser.me/api/portraits/women/7.jpg' },
-  { id: 'f8', name: 'Noor', img: 'https://randomuser.me/api/portraits/women/8.jpg' },
-  { id: 'f9', name: 'Layla', img: 'https://randomuser.me/api/portraits/women/9.jpg' },
-  { id: 'f10', name: 'Yasmin', img: 'https://randomuser.me/api/portraits/women/10.jpg' },
-  { id: 'f11', name: 'Salma', img: 'https://randomuser.me/api/portraits/women/11.jpg' },
-  { id: 'f12', name: 'Amira', img: 'https://randomuser.me/api/portraits/women/12.jpg' },
-  { id: 'f13', name: 'Rania', img: 'https://randomuser.me/api/portraits/women/13.jpg' },
-  { id: 'f14', name: 'Farah', img: 'https://randomuser.me/api/portraits/women/14.jpg' },
-  { id: 'f15', name: 'Maha', img: 'https://randomuser.me/api/portraits/women/15.jpg' },
-  { id: 'f16', name: 'Nada', img: 'https://randomuser.me/api/portraits/women/16.jpg' },
-  { id: 'f17', name: 'Laila', img: 'https://randomuser.me/api/portraits/women/17.jpg' },
-  { id: 'f18', name: 'Dina', img: 'https://randomuser.me/api/portraits/women/18.jpg' },
-  { id: 'f19', name: 'Yasmine', img: 'https://randomuser.me/api/portraits/women/19.jpg' },
-  { id: 'f20', name: 'Mona', img: 'https://randomuser.me/api/portraits/women/20.jpg' },
-  { id: 'f21', name: 'Hala', img: 'https://randomuser.me/api/portraits/women/21.jpg' },
-  { id: 'f22', name: 'Reem', img: 'https://randomuser.me/api/portraits/women/22.jpg' },
-  { id: 'f23', name: 'Noha', img: 'https://randomuser.me/api/portraits/women/23.jpg' },
-  { id: 'f24', name: 'Samar', img: 'https://randomuser.me/api/portraits/women/24.jpg' },
-  { id: 'f25', name: 'Safiya', img: 'https://randomuser.me/api/portraits/women/25.jpg' },
-  { id: 'f26', name: 'Rima', img: 'https://randomuser.me/api/portraits/women/26.jpg' },
-  { id: 'f27', name: 'Suha', img: 'https://randomuser.me/api/portraits/women/27.jpg' },
-  { id: 'f28', name: 'Rasha', img: 'https://randomuser.me/api/portraits/women/28.jpg' },
-  { id: 'f29', name: 'Dalia', img: 'https://randomuser.me/api/portraits/women/29.jpg' },
-  { id: 'f30', name: 'Amina', img: 'https://randomuser.me/api/portraits/women/30.jpg' }
-];
+const femalePeople: { id: string, name: string, img: string }[] = [];
 
 type RankedItem = { id: string, name: string, img: string };
 type LeaderboardEntry = { userName: string, results: RankedItem[], date: number };
