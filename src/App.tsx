@@ -11,26 +11,31 @@ type LeaderboardEntry = { userName: string, results: RankedItem[], date: number 
 
 export default function App() {
   const [gender, setGender] = useState<'male' | 'female'>('male');
-  const items = gender === 'male' ? malePeople : femalePeople;
-  
+  const [itemsToRank, setItemsToRank] = useState<RankedItem[]>(malePeople);
+
   const [sorted, setSorted] = useState<RankedItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(1);
   const [low, setLow] = useState(0);
   const [high, setHigh] = useState(0);
   const [mid, setMid] = useState(0);
-  
-  const [appState, setAppState] = useState<'intro' | 'welcome' | 'setup' | 'sorting' | 'results'>('intro');
-  
+
+  const [appState, setAppState] = useState<'intro' | 'welcome' | 'warning' | 'setup' | 'sorting' | 'results'>('intro');
+
+  const handleGenderChange = (newGender: 'male' | 'female') => {
+    setGender(newGender);
+    setItemsToRank(newGender === 'male' ? [...malePeople] : [...femalePeople]);
+  };
+
   const [leftItem, setLeftItem] = useState<RankedItem | null>(null);
   const [rightItem, setRightItem] = useState<RankedItem | null>(null);
 
   const [currentUser, setCurrentUser] = useState('');
   const [nameInput, setNameInput] = useState('');
-  
+
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<LeaderboardEntry | null>(null);
-  
+
   const [isLeaderboardAuth, setIsLeaderboardAuth] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
 
@@ -45,7 +50,11 @@ export default function App() {
   }, [appState]);
 
   const startSorting = () => {
-    setSorted([items[0]]);
+    if (itemsToRank.length < 2) {
+      alert("You need at least 2 photos to rank.");
+      return;
+    }
+    setSorted([itemsToRank[0]]);
     setCurrentIndex(1);
     setLow(0);
     setHigh(0);
@@ -54,8 +63,8 @@ export default function App() {
 
   useEffect(() => {
     if (appState !== 'sorting') return;
-    
-    if (currentIndex >= items.length) {
+
+    if (currentIndex >= itemsToRank.length) {
       setAppState('results');
       setLeaderboard(prev => {
         const newEntry = { userName: currentUser, results: sorted, date: Date.now() };
@@ -64,10 +73,10 @@ export default function App() {
       });
       return;
     }
-    
+
     if (low > high) {
       const newSorted = [...sorted];
-      newSorted.splice(low, 0, items[currentIndex]);
+      newSorted.splice(low, 0, itemsToRank[currentIndex]);
       setSorted(newSorted);
       setCurrentIndex(currentIndex + 1);
       setLow(0);
@@ -75,10 +84,10 @@ export default function App() {
     } else {
       const newMid = Math.floor((low + high) / 2);
       setMid(newMid);
-      setLeftItem(items[currentIndex]);
+      setLeftItem(itemsToRank[currentIndex]);
       setRightItem(sorted[newMid]);
     }
-  }, [appState, currentIndex, low, high, items, sorted, currentUser]);
+  }, [appState, currentIndex, low, high, itemsToRank, sorted, currentUser]);
 
   const handleChoice = (preferredId: string) => {
     if (!leftItem) return;
@@ -150,14 +159,14 @@ export default function App() {
     >
       {/* Subtle glass highlight */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-      
+
       <h2 className="text-4xl font-light text-white mb-10 tracking-wide">Enter Your Name <span className="text-yellow-400 font-medium">Love</span></h2>
-      
+
       <form onSubmit={(e) => {
         e.preventDefault();
         if (nameInput.trim()) {
           setCurrentUser(nameInput.trim());
-          setAppState('setup');
+          setAppState('warning');
         }
       }}>
         <input
@@ -179,8 +188,36 @@ export default function App() {
     </motion.div>
   );
 
+  const renderWarning = () => (
+    <motion.div
+      key="warning"
+      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95, y: -20 }}
+      className="max-w-md w-full mx-auto mt-20 p-10 bg-white/[0.03] backdrop-blur-3xl border border-white/[0.08] rounded-[2.5rem] shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] text-center relative overflow-hidden"
+    >
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+
+      <h2 className="text-3xl font-light text-white mb-6 tracking-wide">
+        Welcome, <span className="text-yellow-400 font-medium">{currentUser}</span>
+      </h2>
+
+      <p className="text-xl text-gray-300 mb-10 leading-relaxed font-light">
+        This is a fun project from Esam to rank the people around you and see who you like the most 😉
+      </p>
+
+      <button
+        onClick={() => setAppState('setup')}
+        className="w-full px-8 py-5 bg-yellow-400 text-[#0A1128] rounded-2xl font-bold text-xl hover:bg-yellow-300 hover:shadow-[0_0_20px_rgba(250,204,21,0.4)] transition-all active:scale-95 flex items-center justify-center gap-3"
+      >
+        Proceed
+        <ChevronRight size={24} />
+      </button>
+    </motion.div>
+  );
+
   const renderSetup = () => (
-    <motion.div 
+    <motion.div
       key="setup"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -193,22 +230,26 @@ export default function App() {
 
       <div className="flex justify-center gap-4 mb-10">
         <button
-          onClick={() => setGender('male')}
+          onClick={() => handleGenderChange('male')}
           className={`px-8 py-4 rounded-2xl font-bold text-lg transition-all ${gender === 'male' ? 'bg-yellow-400 text-[#0A1128] shadow-[0_0_20px_rgba(250,204,21,0.3)]' : 'bg-gray-800 text-white border border-gray-700 hover:bg-gray-700'}`}
         >
           Male
         </button>
         <button
-          onClick={() => setGender('female')}
+          onClick={() => handleGenderChange('female')}
           className={`px-8 py-4 rounded-2xl font-bold text-lg transition-all ${gender === 'female' ? 'bg-yellow-400 text-[#0A1128] shadow-[0_0_20px_rgba(250,204,21,0.3)]' : 'bg-gray-800 text-white border border-gray-700 hover:bg-gray-700'}`}
         >
           Female
         </button>
       </div>
 
+      <div className="text-center mb-6">
+        <p className="text-gray-400 text-md">Tap the <span className="text-red-400/80 font-bold px-1">×</span> button on any photo to remove it if you don't wish to rank them.</p>
+      </div>
+
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-5 mb-12 max-h-[45vh] overflow-y-auto pr-2 custom-scrollbar">
         <AnimatePresence mode="popLayout">
-          {items.map((item) => (
+          {itemsToRank.map((item) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, scale: 0.8 }}
@@ -220,6 +261,16 @@ export default function App() {
               <div className="absolute inset-0 bg-gradient-to-t from-[#0A1128]/90 via-[#0A1128]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
                 <span className="text-white font-medium truncate text-sm">{item.name}</span>
               </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setItemsToRank(prev => prev.filter(i => i.id !== item.id));
+                }}
+                className="absolute top-2 right-2 p-1.5 md:p-2 bg-red-500/80 hover:bg-red-500 text-white rounded-full opacity-100 md:opacity-0 group-hover:opacity-100 transition-all shadow-md transform hover:scale-110 active:scale-95 z-10"
+                aria-label="Remove photo"
+              >
+                <X size={16} strokeWidth={2.5} />
+              </button>
             </motion.div>
           ))}
         </AnimatePresence>
@@ -231,7 +282,7 @@ export default function App() {
           className="px-12 py-5 bg-yellow-400 text-[#0A1128] rounded-2xl font-bold text-lg hover:bg-yellow-300 hover:shadow-[0_0_30px_rgba(250,204,21,0.3)] transition-all flex items-center gap-3 active:scale-95"
         >
           <Play size={24} fill="currentColor" />
-          Start Ranking {items.length} Photos
+          Start Ranking {itemsToRank.length} Photos
         </button>
       </div>
     </motion.div>
@@ -240,7 +291,7 @@ export default function App() {
   const renderSorting = () => {
     if (!leftItem || !rightItem) return null;
 
-    const progress = Math.round((currentIndex / items.length) * 100);
+    const progress = Math.round((currentIndex / itemsToRank.length) * 100);
 
     return (
       <motion.div
@@ -252,11 +303,11 @@ export default function App() {
       >
         <div className="text-center mb-6 md:mb-10">
           <h2 className="text-3xl md:text-4xl font-light text-white mb-4 tracking-wide">Which one do you <span className="text-yellow-400 font-medium">prefer?</span></h2>
-          
+
           <div className="w-full max-w-md mx-auto mt-6 md:mt-8 bg-gray-800/50 rounded-full h-2 overflow-hidden border border-gray-700">
             <div className="bg-yellow-400 h-full rounded-full transition-all duration-500 ease-out" style={{ width: `${progress}%` }}></div>
           </div>
-          <p className="text-xs font-medium text-gray-500 mt-4 uppercase tracking-widest">Progress: {currentIndex} / {items.length}</p>
+          <p className="text-xs font-medium text-gray-500 mt-4 uppercase tracking-widest">Progress: {currentIndex} / {itemsToRank.length}</p>
         </div>
 
         {/* Side-by-side grid for both mobile and desktop */}
@@ -296,10 +347,10 @@ export default function App() {
           className="flex items-center gap-4 md:gap-6 p-4 md:p-5 rounded-3xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.1] transition-all group"
         >
           <div className={`flex items-center justify-center w-10 h-10 md:w-14 md:h-14 rounded-full font-bold text-lg md:text-2xl shadow-lg shrink-0
-            ${index === 0 ? 'bg-yellow-400 text-[#0A1128] shadow-yellow-400/20' : 
-              index === 1 ? 'bg-gray-300 text-[#0A1128] shadow-gray-300/20' : 
-              index === 2 ? 'bg-amber-600 text-white shadow-amber-600/20' : 
-              'bg-gray-800 text-gray-400 border border-gray-700'}`}
+            ${index === 0 ? 'bg-yellow-400 text-[#0A1128] shadow-yellow-400/20' :
+              index === 1 ? 'bg-gray-300 text-[#0A1128] shadow-gray-300/20' :
+                index === 2 ? 'bg-amber-600 text-white shadow-amber-600/20' :
+                  'bg-gray-800 text-gray-400 border border-gray-700'}`}
           >
             {index + 1}
           </div>
@@ -320,7 +371,7 @@ export default function App() {
       className="max-w-4xl mx-auto p-6 md:p-12 bg-white/[0.02] backdrop-blur-2xl rounded-[2.5rem] shadow-2xl border border-white/[0.05] w-full"
     >
       <div className="text-center mb-10 md:mb-12">
-        <motion.div 
+        <motion.div
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
@@ -376,7 +427,7 @@ export default function App() {
                   {selectedUser ? <><span className="font-medium text-yellow-400">{selectedUser.userName}'s</span> Ranking</> : 'Leaderboard'}
                 </h2>
               </div>
-              <button 
+              <button
                 onClick={() => {
                   setIsLeaderboardOpen(false);
                   setSelectedUser(null);
@@ -397,7 +448,7 @@ export default function App() {
                   </div>
                   <h3 className="text-2xl font-medium text-white mb-3">Password Required</h3>
                   <p className="text-gray-400 mb-8 text-center">Only Esam can see the results for privacy</p>
-                  
+
                   <form onSubmit={handlePasswordSubmit} className="w-full max-w-sm">
                     <input
                       type="password"
@@ -457,7 +508,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#0A1128] text-white font-sans selection:bg-yellow-400/30 selection:text-yellow-200 relative overflow-hidden flex flex-col">
-      
+
       {/* Background ambient glow */}
       <div className="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-yellow-400/5 blur-[120px] pointer-events-none"></div>
       <div className="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-gray-500/5 blur-[120px] pointer-events-none"></div>
@@ -476,7 +527,7 @@ export default function App() {
       ) : (
         <>
           {/* Header */}
-          {appState !== 'welcome' && appState !== 'sorting' && (
+          {appState !== 'welcome' && appState !== 'warning' && appState !== 'sorting' && (
             <header className="relative z-20 w-full max-w-7xl mx-auto p-6 flex items-center justify-end">
               <button
                 onClick={() => setIsLeaderboardOpen(true)}
@@ -492,6 +543,7 @@ export default function App() {
           <main className="flex-1 relative z-10 p-4 md:p-8 flex flex-col justify-center">
             <AnimatePresence mode="wait">
               {appState === 'welcome' && renderWelcome()}
+              {appState === 'warning' && renderWarning()}
               {appState === 'setup' && renderSetup()}
               {appState === 'sorting' && renderSorting()}
               {appState === 'results' && renderResults()}
