@@ -3,19 +3,19 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Play, Trophy, RotateCcw, ChevronRight, X, ArrowLeft, Lock, Unlock } from 'lucide-react';
 
 const malePeople: { id: string, name: string, img: string }[] = [
-  { id: 'm1', name: 'Photo 1', img: '/photos/photo1.jpg' },
-  { id: 'm2', name: 'Photo 2', img: '/photos/photo2.jpg' },
-  { id: 'm3', name: 'Photo 3', img: '/photos/photo3.jpg' },
-  { id: 'm4', name: 'Photo 4', img: '/photos/photo4.jpg' },
-  { id: 'm5', name: 'Photo 5', img: '/photos/photo5.jpg' }
+  { id: 'm1', name: 'Photo 1', img: '/photos/male1.jpg' },
+  { id: 'm2', name: 'Photo 2', img: '/photos/male2.jpg' },
+  { id: 'm3', name: 'Photo 3', img: '/photos/male3.jpg' },
+  { id: 'm4', name: 'Photo 4', img: '/photos/male4.jpg' },
+  { id: 'm5', name: 'Photo 5', img: '/photos/male5.jpg' }
 ];
 
 const femalePeople: { id: string, name: string, img: string }[] = [
-  { id: 'f1', name: 'Photo 1', img: '/photos/photo1.jpg' },
-  { id: 'f2', name: 'Photo 2', img: '/photos/photo2.jpg' },
-  { id: 'f3', name: 'Photo 3', img: '/photos/photo3.jpg' },
-  { id: 'f4', name: 'Photo 4', img: '/photos/photo4.jpg' },
-  { id: 'f5', name: 'Photo 5', img: '/photos/photo5.jpg' }
+  { id: 'f1', name: 'Photo 1', img: '/photos/female1.jpg' },
+  { id: 'f2', name: 'Photo 2', img: '/photos/female2.jpg' },
+  { id: 'f3', name: 'Photo 3', img: '/photos/female3.jpg' },
+  { id: 'f4', name: 'Photo 4', img: '/photos/female4.jpg' },
+  { id: 'f5', name: 'Photo 5', img: '/photos/female5.jpg' }
 ];
 
 type RankedItem = { id: string, name: string, img: string };
