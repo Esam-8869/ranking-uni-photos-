@@ -2,9 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, Trophy, RotateCcw, ChevronRight, X, ArrowLeft, Lock, Unlock } from 'lucide-react';
 
-const malePeople: { id: string, name: string, img: string }[] = [];
+const malePeople: { id: string, name: string, img: string }[] = [
+  { id: 'm1', name: 'Ahmed', img: 'https://randomuser.me/api/portraits/men/1.jpg' },
+  { id: 'm2', name: 'Ali', img: 'https://randomuser.me/api/portraits/men/2.jpg' },
+  { id: 'm3', name: 'Omar', img: 'https://randomuser.me/api/portraits/men/3.jpg' },
+  { id: 'm4', name: 'Tariq', img: 'https://randomuser.me/api/portraits/men/4.jpg' },
+  { id: 'm5', name: 'Youssef', img: 'https://randomuser.me/api/portraits/men/5.jpg' }
+];
 
-const femalePeople: { id: string, name: string, img: string }[] = [];
+const femalePeople: { id: string, name: string, img: string }[] = [
+  { id: 'f1', name: 'Fatima', img: 'https://randomuser.me/api/portraits/women/1.jpg' },
+  { id: 'f2', name: 'Aisha', img: 'https://randomuser.me/api/portraits/women/2.jpg' },
+  { id: 'f3', name: 'Khadija', img: 'https://randomuser.me/api/portraits/women/3.jpg' },
+  { id: 'f4', name: 'Maryam', img: 'https://randomuser.me/api/portraits/women/4.jpg' },
+  { id: 'f5', name: 'Zainab', img: 'https://randomuser.me/api/portraits/women/5.jpg' }
+];
 
 type RankedItem = { id: string, name: string, img: string };
 type LeaderboardEntry = { userName: string, results: RankedItem[], date: number };
