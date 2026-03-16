@@ -1,21 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, Trophy, RotateCcw, ChevronRight, X, ArrowLeft, Lock, Unlock } from 'lucide-react';
+import { db } from './firebase';
+import { collection, doc, setDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 const malePeople: { id: string, name: string, img: string }[] = [
-  { id: 'm1', name: 'Photo 1', img: '/photos/male1.jpg' },
-  { id: 'm2', name: 'Photo 2', img: '/photos/male2.jpg' },
-  { id: 'm3', name: 'Photo 3', img: '/photos/male3.jpg' },
-  { id: 'm4', name: 'Photo 4', img: '/photos/male4.jpg' },
-  { id: 'm5', name: 'Photo 5', img: '/photos/male5.jpg' }
+  { id: 'm1', name: 'Photo 1', img: 'photos/male1.jpg' },
+  { id: 'm2', name: 'Photo 2', img: 'photos/male2.jpg' },
+  { id: 'm3', name: 'Photo 3', img: 'photos/male3.jpg' },
+  { id: 'm4', name: 'Photo 4', img: 'photos/male4.jpg' },
+  { id: 'm5', name: 'Photo 5', img: 'photos/male5.jpg' }
 ];
 
 const femalePeople: { id: string, name: string, img: string }[] = [
-  { id: 'f1', name: 'Photo 1', img: '/photos/female1.jpg' },
-  { id: 'f2', name: 'Photo 2', img: '/photos/female2.jpg' },
-  { id: 'f3', name: 'Photo 3', img: '/photos/female3.jpg' },
-  { id: 'f4', name: 'Photo 4', img: '/photos/female4.jpg' },
-  { id: 'f5', name: 'Photo 5', img: '/photos/female5.jpg' }
+  { id: 'f1', name: 'Photo 1', img: '/photos/f1.jpg' },
+  { id: 'f2', name: 'Photo 2', img: '/photos/f2.jpg' },
+  { id: 'f3', name: 'Photo 3', img: '/photos/f3.jpg' },
+  { id: 'f4', name: 'Photo 4', img: '/photos/f4.jpg' },
+  { id: 'f5', name: 'Photo 5', img: '/photos/f5.jpg' },
+  { id: 'f6', name: 'Photo 6', img: '/photos/f6.jpg' },
+  { id: 'f7', name: 'Photo 7', img: '/photos/f7.jpg' },
+  { id: 'f8', name: 'Photo 8', img: '/photos/f8.jpg' },
+  { id: 'f9', name: 'Photo 9', img: '/photos/f9.jpg' }
 ];
 
 type RankedItem = { id: string, name: string, img: string };
@@ -45,6 +51,7 @@ export default function App() {
   const [nameInput, setNameInput] = useState('');
 
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(true);
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<LeaderboardEntry | null>(null);
 
@@ -60,6 +67,19 @@ export default function App() {
       return () => clearTimeout(timer);
     }
   }, [appState]);
+
+  // Real-time Firestore leaderboard listener
+  useEffect(() => {
+    const q = query(collection(db, 'rankings'), orderBy('date', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const entries: LeaderboardEntry[] = snapshot.docs.map(d => d.data() as LeaderboardEntry);
+      setLeaderboard(entries);
+      setLeaderboardLoading(false);
+    }, () => {
+      setLeaderboardLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const startSorting = () => {
     if (itemsToRank.length < 2) {
@@ -78,11 +98,9 @@ export default function App() {
 
     if (currentIndex >= itemsToRank.length) {
       setAppState('results');
-      setLeaderboard(prev => {
-        const newEntry = { userName: currentUser, results: sorted, date: Date.now() };
-        const filtered = prev.filter(p => p.userName !== currentUser);
-        return [...filtered, newEntry];
-      });
+      // Save to Firestore (overwrites previous entry by same user)
+      const entry: LeaderboardEntry = { userName: currentUser, results: sorted, date: Date.now() };
+      setDoc(doc(db, 'rankings', currentUser), entry).catch(console.error);
       return;
     }
 
@@ -484,13 +502,17 @@ export default function App() {
                 renderResultsList(selectedUser.results)
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {leaderboard.length === 0 ? (
+                  {leaderboardLoading ? (
+                    <div className="col-span-full text-center py-20">
+                      <p className="text-gray-400 text-xl font-light animate-pulse">Loading rankings…</p>
+                    </div>
+                  ) : leaderboard.length === 0 ? (
                     <div className="col-span-full text-center py-20">
                       <p className="text-gray-500 text-xl font-light">No rankings yet.</p>
                       <p className="text-gray-600 mt-2">Be the first to rank!</p>
                     </div>
                   ) : (
-                    leaderboard.sort((a, b) => b.date - a.date).map((entry) => (
+                    leaderboard.map((entry) => (
                       <button
                         key={entry.userName}
                         onClick={() => setSelectedUser(entry)}
